@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 项目运行时产物（代码示例运行后生成）
+10-AI应用实战/code/output/
+10-AI应用实战/code/*.log
+hitl_audit.log
+permissions_audit.log
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.swp
+
+# 本地环境
+.venv/
+venv/
+.env
