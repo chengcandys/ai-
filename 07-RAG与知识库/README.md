@@ -14,21 +14,19 @@ LLM 有三大短板，RAG（Retrieval-Augmented Generation）一并解决：
 
 ## 2. RAG 工作流程
 
+> 上半段是**离线建库**（一次性，可批量），下半段是**在线问答**（每次请求实时执行），中间通过向量数据库衔接。
+
 ```mermaid
 graph TD
-    subgraph 离线：建库
-        D[文档] --> C["切分 Chunking<br/>切成小段"]
-        C --> E["Embedding<br/>每段转成向量"]
-        E --> V[("向量数据库")]
-    end
-    subgraph 在线：问答
-        Q[用户问题] --> QE[问题向量化]
-        QE --> S[相似度检索 Top-K]
-        V --> S
-        S --> P["拼装 Prompt<br/>问题 + 检索到的资料"]
-        P --> L[LLM]
-        L --> A[带来源的回答]
-    end
+    D["① 文档（离线建库）"] --> C["② 切分 Chunking<br/>切成小段"]
+    C --> E["③ Embedding<br/>每段转成向量"]
+    E --> V[("向量数据库")]
+    Q["④ 用户问题（在线问答）"] --> QE["⑤ 问题向量化"]
+    QE --> S["⑥ 相似度检索 Top-K"]
+    V --> S
+    S --> P["⑦ 拼装 Prompt<br/>问题 + 检索到的资料"]
+    P --> L["⑧ LLM 生成"]
+    L --> A["⑨ 带来源的回答"]
 ```
 
 ## 3. 核心技术概念
