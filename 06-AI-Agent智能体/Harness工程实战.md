@@ -107,8 +107,8 @@ Context Engineering / Architectural Constraints / Garbage Collection；并指出
 
 ## 9. 延伸阅读
 
-- **配套实战**：[HarnessLoop实战](./HarnessLoop实战.md) —— 本文六层框架的可运行实现教程（拦截/two-strike/独立验证/上下文交接逐段拆解）
-- **配套代码**：[project9_harness_loop.py](../10-AI应用实战/code/project9_harness_loop.py) —— 六层框架落地代码（离线可跑）
+- **配套实战**：[AgentLoop工程实战](./AgentLoop工程实战.md) —— 用本文六层框架实现标准 Agent Loop 的教程（拦截/two-strike/独立验证/上下文交接逐段拆解）
+- **配套代码**：[project9_agent_loop.py](../10-AI应用实战/code/project9_agent_loop.py) —— 六层框架落地代码（离线可跑）
 - [Agent工程体系总览](./Agent工程体系总览.md) —— 五层结构与 10 设计轴
 - [上下文工程详解](./上下文工程详解.md) —— 六维度与压缩策略
 - [沙盒与执行隔离详解](./沙盒与执行隔离详解.md) —— L6 约束与恢复层的技术实现（隔离光谱与选型）

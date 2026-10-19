@@ -1,14 +1,16 @@
-# 深入专题 · Harness Loop 实战（把六层框架跑起来）
+# 深入专题 · Agent Loop 工程实战（用 Harness 六层框架跑起来）
 
 > [Harness工程实战](./Harness工程实战.md) 讲的是"**应该建什么**"——六层检查框架、成熟度阶梯、一线案例；
-> 本文讲"**怎么建**"——用约 250 行可离线运行的 Python，把六层框架落成一个真实的 Agent Loop 引擎。
+> 本文讲"**怎么建**"——用约 250 行可离线运行的 Python，把六层框架落成一个标准的 **Agent Loop**（业界通用叫法，Anthropic/OpenAI 均用 "agent loop / agentic loop" 指代"模型决策 → 工具执行 → 结果观察"的核心循环）。
 >
-> **配套代码**：[project9_harness_loop.py](../10-AI应用实战/code/project9_harness_loop.py)（无模型依赖，`python project9_harness_loop.py` 直接跑）
+> 两个概念别混：**Agent Loop 是循环本身，Harness 是让循环跑得稳的工程层**（模型之外的一切）。Loop 回答"怎么转"，Harness 回答"怎么不翻车"。
+>
+> **配套代码**：[project9_agent_loop.py](../10-AI应用实战/code/project9_agent_loop.py)（无模型依赖，`python project9_agent_loop.py` 直接跑）
 
 ## 1. 这个工程解决什么
 
-| Harness 三大痛点 | 对应 demo | 一句话 |
-|------------------|-----------|--------|
+| Agent Loop 三大痛点 | 对应 demo | 一句话 |
+|---------------------|-----------|--------|
 | 怎么形成"做→查→修"的闭环 | demo1 | 幻觉工具被拦截 → 修正 → 执行 → **独立验证**才允许结束 |
 | 怎么防死循环、防傻转 | demo2 | 同样的失败调用连续 2 次 → **two-strike 升级人工** |
 | 上下文越滚越长怎么办 | demo3 | 超阈值 → context reset + **结构化交接文档**，reset 零信息损失 |
@@ -33,8 +35,8 @@ graph TD
 
 运行后产出两个文件，对应 Harness 的 L4 与 L5：
 
-- `harness_loop_state.json` —— 进度文件（断点续跑的依据）
-- `harness_loop_trace.log` —— JSONL 观测日志（每个决策留痕，grep 友好）
+- `agent_loop_state.json` —— 进度文件（断点续跑的依据）
+- `agent_loop_trace.log` —— JSONL 观测日志（每个决策留痕，grep 友好）
 
 ## 3. 六层框架 → 代码映射
 
@@ -44,7 +46,7 @@ graph TD
 |----|----------|----------|
 | L1 信息边界 | `build_context()` | 喂"**任务状态**"而非堆全量历史——上下文可以 reset，状态不能丢 |
 | L2 工具系统 | `TOOLS` 注册表 | 错误信息自带修复指令（"错误即上下文"，OpenAI 实践） |
-| L3 执行编排 | `HarnessLoop.run()` | 决策 → 过闸 → 执行 → 验证 的**四拍循环** |
+| L3 执行编排 | `AgentLoop.run()` | 决策 → 过闸 → 执行 → 验证 的**四拍循环** |
 | L4 记忆状态 | `ProgressState` | JSON 进度文件落盘；`handoff()` 生成结构化交接文档 |
 | L5 评估观测 | `verify_*` + `trace()` | **独立复算**对照答案，不用 AI 眼睛查 AI 作业 |
 | L6 约束恢复 | `Gate` + two-strike | 白名单拦截、重复失败检测、最大步数、升级人工 |
@@ -120,7 +122,7 @@ class RealLLM:
             model=self.model, temperature=0,
             messages=[
                 {"role": "system", "content":
-                    "你是 Loop 中的决策器。根据任务状态输出一个 JSON 动作："
+                    "你是 Agent Loop 中的决策器。根据任务状态输出一个 JSON 动作："
                     '{"tool": "工具名", "args": {...}} 或 {"tool": "final", "answer": "..."}。'
                     "只能使用给定工具白名单。"},
                 {"role": "user", "content": json.dumps(ctx, ensure_ascii=False)},
@@ -149,11 +151,13 @@ class RealLLM:
 3. demo3 里 reset 之后模型为什么"知道"该查深圳？（提示：两种原因，脚本与真实 LLM 各是什么）
 4. 把 `ProgressState` 去掉、全靠 history 传状态，reset 会出什么问题？
 5. 本工程对应成熟度阶梯哪一级？要升到 L3 最先该补哪两项？
+6. 用自己的话说清 Agent Loop 与 Harness 的关系（谁转圈、谁定规则）
 
 ## 9. 延伸阅读
 
 - [Harness工程实战](./Harness工程实战.md) —— 本文的理论底座：六层框架、成熟度阶梯、OpenAI/Stripe 案例
 - [上下文工程详解](./上下文工程详解.md) —— demo3 交接机制的原理：Smart/Dumb Zone、压缩与渐进披露
-- [Agent设计模式详解](./Agent设计模式详解.md) —— Loop 模式在 14 种设计模式中的位置，ReAct 与本工程的分工
+- [Agent设计模式详解](./Agent设计模式详解.md) —— Loop 模式在 14 种设计模式中的位置，ReAct 与 Agent Loop 的分工
+- [Agent工程体系总览](./Agent工程体系总览.md) —— Prompt → Context → Harness → Loop 四代范式，本文属于第四代
 - [Agent权限体系与动态授权](./Agent权限体系与动态授权.md) —— L6 的进阶版：PDP/PEP 过闸、JIT 授权（配套 `project8_dynamic_permissions.py`）
 - [沙盒与执行隔离详解](./沙盒与执行隔离详解.md) —— 工具执行层的隔离方案（L6 的基础设施侧）

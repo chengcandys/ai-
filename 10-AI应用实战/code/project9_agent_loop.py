@@ -1,7 +1,7 @@
 """
-项目9：Harness Loop 工程（可离线运行，无模型依赖）
+项目9：Agent Loop 工程（Harness 六层框架落地，可离线运行，无模型依赖）
 
-对应 06 目录《Harness工程实战》："模型是大脑，代码是 Harness"。
+对应 06 目录《Harness工程实战》与《AgentLoop工程实战》："模型是大脑，代码是 Harness"。
 本文件把六层检查框架落成一个可跑的 Agent Loop 引擎，并用 MockLLM 剧本演示三个场景：
   demo1 完整闭环：幻觉工具被 L6 拦截 → 修正 → 工具执行 → L5 独立验证 → 完成 → 断点续跑
   demo2 防死循环：同样的失败调用连续 2 次 → two-strike 升级人工（Stripe 实践）
@@ -10,13 +10,13 @@
 六层映射（对照 Harness工程实战.md §2）：
   L1 信息边界  → build_context()：喂"任务状态 + 最近几步"，不堆全量历史
   L2 工具系统  → TOOLS 注册表，错误信息自带修复指令（错误即上下文）
-  L3 执行编排  → HarnessLoop.run()：决策 → 过闸 → 执行 → 验证 四拍循环
+  L3 执行编排  → AgentLoop.run()：决策 → 过闸 → 执行 → 验证 四拍循环
   L4 记忆状态  → ProgressState：JSON 进度文件落盘，断点续跑
   L5 评估观测  → Verifier：独立复算验证（不用 AI 眼睛查 AI 作业）+ trace 日志
   L6 约束恢复  → Gate 白名单拦截 / 重复检测 two-strike / 最大步数 / 升级人工
 
-运行：python project9_harness_loop.py
-产出：harness_loop_state.json（进度文件）、harness_loop_trace.log（观测日志）
+运行：python project9_agent_loop.py
+产出：agent_loop_state.json（进度文件）、agent_loop_trace.log（观测日志）
 """
 import json
 import os
@@ -29,7 +29,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 BASE_DIR = os.path.dirname(__file__)
-TRACE_PATH = os.path.join(BASE_DIR, "harness_loop_trace.log")
+TRACE_PATH = os.path.join(BASE_DIR, "agent_loop_trace.log")
 
 
 def trace(event: str, **kw):
@@ -72,7 +72,7 @@ TOOLS = {
 # ---------------- L4 记忆与状态：进度文件落盘，断点续跑 ----------------
 class ProgressState:
     """结构化任务状态。上下文可以 reset，状态不能丢——这是交接零损失的前提"""
-    PATH = os.path.join(BASE_DIR, "harness_loop_state.json")
+    PATH = os.path.join(BASE_DIR, "agent_loop_state.json")
 
     def __init__(self, task_id: str, goal: str):
         self.task_id, self.goal = task_id, goal
@@ -133,7 +133,7 @@ class EscalateToHuman(Exception):
 
 
 # ---------------- L3 执行编排：四拍循环 ----------------
-class HarnessLoop:
+class AgentLoop:
     def __init__(self, llm, verifier, history_budget: int = 50, max_steps: int = 8):
         self.llm, self.verifier = llm, verifier
         self.history_budget = history_budget
@@ -257,25 +257,25 @@ def banner(title: str):
 
 def demo1():
     banner("demo1 · 完整闭环：幻觉拦截 → 修正 → 执行 → 独立验证 → 断点续跑")
-    loop = HarnessLoop(MockLLM(SCRIPT_SETTLE), verifier=verify_settlement)
+    loop = AgentLoop(MockLLM(SCRIPT_SETTLE), verifier=verify_settlement)
     state = ProgressState.load_or_init("settlement", "238 人每人 47 元团建，3 个部门平摊，求每部门金额")
     answer = loop.run(state)
     print(f"\n  最终答案: {answer}")
     print("\n  —— 同一任务再跑一次：进度文件已 done，断点续跑直接跳过 ——")
-    HarnessLoop(MockLLM([]), verifier=verify_settlement).run(
+    AgentLoop(MockLLM([]), verifier=verify_settlement).run(
         ProgressState.load_or_init("settlement", "同上"))
 
 
 def demo2():
     banner("demo2 · 防死循环：重复失败 two-strike 升级人工")
-    loop = HarnessLoop(MockLLM(SCRIPT_FLAKY), verifier=verify_settlement)
+    loop = AgentLoop(MockLLM(SCRIPT_FLAKY), verifier=verify_settlement)
     state = ProgressState.load_or_init("flaky", "计算 500/0（分母为 0 的坏数据）")
     print(f"  结果: {loop.run(state)}")
 
 
 def demo3():
     banner("demo3 · 上下文交接：历史超限 → reset + 交接文档 → 继续")
-    loop = HarnessLoop(MockLLM(SCRIPT_WEATHER), verifier=verify_weather, history_budget=3)
+    loop = AgentLoop(MockLLM(SCRIPT_WEATHER), verifier=verify_weather, history_budget=3)
     state = ProgressState.load_or_init("weather", "查 5 个城市天气并汇总最热城市")
     answer = loop.run(state)
     print(f"\n  最终答案: {answer}")
