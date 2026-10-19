@@ -20,8 +20,11 @@ $env:OPENAI_API_KEY="sk-你的key"
 | `project6_hitl.py` | **扩展：人机交互 HITL**（澄清/计划确认/分级审批/升级转交/审计日志） | `python project6_hitl.py` | 无模型依赖（可离线跑） |
 | `project7_agent_patterns.py` | **扩展：设计模式对比实验**（Chaining/Routing/Parallel/Reflection 同任务对比 token 成本） | `python project7_agent_patterns.py` | openai |
 | `project8_dynamic_permissions.py` | **扩展：动态权限演示**（风险分级/PEP 拦截/权限滑块/JIT 三级授权记忆/注入自动降权/审计） | `python project8_dynamic_permissions.py` | 无模型依赖（可离线跑） |
+| `project9_harness_loop.py` | **扩展：Harness Loop 工程**（六层框架落地，教程见 [HarnessLoop实战](../../06-AI-Agent智能体/HarnessLoop实战.md)：状态驱动上下文/白名单与 two-strike/独立复算验证/交接文档/断点续跑） | `python project9_harness_loop.py` | 无模型依赖（可离线跑） |
 
 > `project8` 审计日志写入 `code/permissions_audit.log`。
+
+> `project9` 进度文件写入 `code/harness_loop_state.json`、观测日志写入 `code/harness_loop_trace.log`（均为运行时产物）。
 
 > `project5` 产出写入 `code/output/multi_agent_report.md`；`project6` 审计日志写入 `code/hitl_audit.log`。
 

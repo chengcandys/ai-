@@ -85,7 +85,8 @@ graph LR
 
 - [Agent工程体系总览](./Agent工程体系总览.md) —— 深入专题：Prompt→Context→Harness→Loop 演进、五层结构、10 设计轴
 - [上下文工程详解](./上下文工程详解.md) —— 深入专题：六维度、Smart/Dumb Zone、压缩与渐进披露
-- [Harness工程实战](./Harness工程实战.md) —— 深入专题：六层检查框架、成熟度阶梯、OpenAI/Stripe 案例
+- [Harness工程实战](./Harness工程实战.md) —— 深入专题：六层检查框架、成熟度阶梯、OpenAI/Stripe 案例（配套可跑代码 `project9_harness_loop.py`）
+- [HarnessLoop实战](./HarnessLoop实战.md) —— **实战教程**：把六层框架落成可运行的 Agent Loop 引擎（拦截/独立验证/two-strike/上下文交接逐段拆解 + Mock 换真实 LLM 改造路径）
 - [多Agent协作详解](./多Agent协作详解.md) —— 深入专题：五种协作架构、通信与一致性、真实用例拆解
 - [多Agent用例库](./多Agent用例库.md) —— **15 个行业场景**：研发/内容/企业/专业领域的多 Agent 落地套路
 - [沙盒与执行隔离详解](./沙盒与执行隔离详解.md) —— 深入专题：隔离六级光谱、六种技术方案对比选型、六道防线、反模式、**企业级沙盒平台清单**（E2B/AgentCore/OpenSandbox 等，联网核实）
